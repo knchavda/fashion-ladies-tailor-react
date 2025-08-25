@@ -1,0 +1,64 @@
+import React, { useState } from "react";
+import { FiArrowLeft } from "react-icons/fi";
+
+export default function AddSalwar({ onBack }) {
+  const fields = [
+   "Length", 
+  "Bottom"
+  ];
+
+  const [formData, setFormData] = useState({});
+
+  const handleChange = (e, field) => {
+    setFormData({ ...formData, [field]: e.target.value });
+  };
+
+  const handleSubmit = () => {
+    console.log("Form Submitted:", formData);
+    alert("Data saved successfully!");
+  };
+
+  return (
+    <div className="flex flex-col items-center min-h-screen bg-sky-50 px-4 py-6">
+      {/* Header with Back button */}
+      <div className="w-full max-w-md flex items-center mb-4 card p-3">
+        <FiArrowLeft
+          onClick={onBack}
+          className="text-sky-700 text-2xl cursor-pointer"
+        />
+        <h2 className="flex-1 text-xl font-bold text-sky-700 text-center">
+          Add Salwar Measurement
+        </h2>
+      </div>
+
+      {/* Card Section */}
+      <div className="card w-full max-w-md p-4 shadow-lg bg-white rounded-xl">
+        <div className="space-y-4">
+          {fields.map((field, i) => (
+            <div key={i} className="flex flex-col">
+              <label className="text-sm font-medium text-gray-600 mb-1">
+                {field}
+              </label>
+              <input
+                type="number"
+                placeholder={`Enter ${field}`}
+                className="input"
+                value={formData[field] || ""}
+                onChange={(e) => handleChange(e, field)}
+              />
+            </div>
+          ))}
+        </div>
+
+        <div className="mt-6">
+          <button
+            onClick={handleSubmit}
+            className="btn bg-sky-500 hover:bg-sky-600 text-white w-full"
+          >
+            Save
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}

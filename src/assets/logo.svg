@@ -1,0 +1,16 @@
+<svg width="160" height="160" viewBox="0 0 160 160" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#79cdff"/>
+      <stop offset="100%" stop-color="#1ea1ff"/>
+    </linearGradient>
+  </defs>
+  <circle cx="80" cy="80" r="74" fill="url(#g)" opacity="0.25"/>
+  <path d="M40 35 h80 l-10 25 a30 30 0 0 1 -60 0 z" fill="url(#g)" />
+  <path d="M65 85 c0 25 -15 40 -15 40 h-8 c10 -15 10 -35 10 -55 z" fill="#79cdff"/>
+  <path d="M95 85 c0 25 15 40 15 40 h8 c-10 -15 -10 -35 -10 -55 z" fill="#79cdff"/>
+  <circle cx="80" cy="50" r="8" fill="#fff"/>
+  <text x="80" y="125" font-size="14" text-anchor="middle" fill="#0b3e66" font-family="Arial, Helvetica, sans-serif">
+    Fashion Ladies Tailor
+  </text>
+</svg>
