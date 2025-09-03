@@ -23,8 +23,11 @@ export default function AddPersonal({
   };
 
   useEffect(() => {
-    if (hasCustomer && mode?.type === "edit") {
+    if (hasCustomer?.data && mode?.type === "edit") {
       setFormData(hasCustomer?.data);
+    } else {
+      setHasCustomer(null)
+      setMode(null)
     }
   }, [hasCustomer]);
 

@@ -24,14 +24,18 @@ export default function AddSalwar({
   };
 
   useEffect(() => {
-    if (hasCustomer && mode?.type === "edit") {
+    if (hasCustomer?.data && mode?.type === "edit") {
       setFormData(hasCustomer?.data);
       const findCustomer = options?.find(
         (item) => item?.value === hasCustomer.id
       );
       setSelectedUser(findCustomer);
+    } else {
+      setHasCustomer(null);
+      setMode(null);
     }
   }, [hasCustomer]);
+  
   const handleSubmit = async () => {
     const isValid = fields.every((field) => {
       return formData?.[field] && formData[field].trim() !== "";
@@ -65,7 +69,7 @@ export default function AddSalwar({
           updatedAt: new Date(),
         });
 
-        toast.success("Salwar data updated successfully!");
+        toast.success("Salwar data saved successfully!");
         setFormData({});
         onBack();
       }

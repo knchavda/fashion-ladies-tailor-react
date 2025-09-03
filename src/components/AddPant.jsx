@@ -31,12 +31,15 @@ export default function AddPant({
   };
 
   useEffect(() => {
-    if (hasCustomer && mode?.type === "edit") {
+    if (hasCustomer?.data && mode?.type === "edit") {
       setFormData(hasCustomer?.data);
       const findCustomer = options?.find(
         (item) => item?.value === hasCustomer.id
       );
       setSelectedUser(findCustomer);
+    } else {
+      setHasCustomer(null)
+      setMode(null)
     }
   }, [hasCustomer]);
 
@@ -73,7 +76,7 @@ export default function AddPant({
           updatedAt: new Date(),
         });
 
-        toast.success("Pent data updated successfully!");
+        toast.success("Pent data saved successfully!");
         setFormData({});
         onBack();
       }

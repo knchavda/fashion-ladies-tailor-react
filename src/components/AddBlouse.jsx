@@ -38,12 +38,15 @@ export default function AddBlouse({
   };
 
   useEffect(() => {
-    if (hasCustomer && mode?.type === "edit") {
+    if (hasCustomer?.data && mode?.type === "edit") {
       setFormData(hasCustomer?.data);
       const findCustomer = options?.find(
         (item) => item?.value === hasCustomer.id
       );
       setSelectedUser(findCustomer);
+    } else {
+      setMode(null)
+      setHasCustomer(null)
     }
   }, [hasCustomer]);
 
@@ -80,7 +83,7 @@ export default function AddBlouse({
           updatedAt: new Date(),
         });
 
-        toast.success("Blouse data updated successfully!");
+        toast.success("Blouse data saved successfully!");
         setFormData({});
         onBack();
       }

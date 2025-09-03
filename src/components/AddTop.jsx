@@ -35,12 +35,15 @@ export default function AddTop({
   };
 
   useEffect(() => {
-    if (hasCustomer && mode?.type === "edit") {
+    if (hasCustomer?.data && mode?.type === "edit") {
       setFormData(hasCustomer?.data);
       const findCustomer = options?.find(
         (item) => item?.value === hasCustomer.id
       );
       setSelectedUser(findCustomer);
+    } else {
+      setMode(null)
+      setHasCustomer(null)
     }
   }, [hasCustomer]);
 
@@ -78,7 +81,7 @@ export default function AddTop({
           updatedAt: new Date(),
         });
 
-        toast.success("Top data updated successfully!");
+        toast.success("Top data saved successfully!");
         setFormData({});
         onBack();
       }

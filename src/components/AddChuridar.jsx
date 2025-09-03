@@ -24,12 +24,15 @@ export default function AddChuridar({
   };
 
   useEffect(() => {
-    if (hasCustomer && mode?.type === "edit") {
+    if (hasCustomer?.data && mode?.type === "edit") {
       setFormData(hasCustomer?.data);
       const findCustomer = options?.find(
         (item) => item?.value === hasCustomer.id
       );
       setSelectedUser(findCustomer);
+    } else {
+      setHasCustomer(null);
+      setMode(null);
     }
   }, [hasCustomer]);
 
@@ -66,7 +69,7 @@ export default function AddChuridar({
           updatedAt: new Date(),
         });
 
-        toast.success("Chruidar data updated successfully!");
+        toast.success("Chruidar data saved successfully!");
         setFormData({});
         onBack();
       }
@@ -100,7 +103,7 @@ export default function AddChuridar({
           />
         </div>
         <div className="space-y-4">
-          {fields.map((field, i) => (
+          {fields?.map((field, i) => (
             <div key={i} className="flex flex-col">
               <label className="text-sm font-medium text-gray-600 mb-1">
                 {field} {true && <span className="text-red-500">*</span>}
