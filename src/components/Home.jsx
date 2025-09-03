@@ -38,11 +38,17 @@ export default function Home({ mode, setMode, hasCustomer, setHasCustomer }) {
     }
   }, [hasCustomer]);
 
+  const onBack = () => {
+    setPage("home")
+    setHasCustomer(null)
+    setMode(null)
+  }
+
   // Page rendering logic
   if (page === "addTop")
     return (
       <AddTop
-        onBack={() => setPage("home")}
+        onBack={onBack}
         hasCustomer={hasCustomer}
         setHasCustomer={setHasCustomer}
         setMode={setMode}
@@ -52,7 +58,7 @@ export default function Home({ mode, setMode, hasCustomer, setHasCustomer }) {
   if (page === "addSalwar")
     return (
       <AddSalwar
-        onBack={() => setPage("home")}
+        onBack={onBack}
         hasCustomer={hasCustomer}
         setHasCustomer={setHasCustomer}
         setMode={setMode}
@@ -62,7 +68,7 @@ export default function Home({ mode, setMode, hasCustomer, setHasCustomer }) {
   if (page === "addPant")
     return (
       <AddPant
-        onBack={() => setPage("home")}
+        onBack={onBack}
         hasCustomer={hasCustomer}
         setHasCustomer={setHasCustomer}
         setMode={setMode}
@@ -72,7 +78,7 @@ export default function Home({ mode, setMode, hasCustomer, setHasCustomer }) {
   if (page === "addChuridar")
     return (
       <AddChuridar
-        onBack={() => setPage("home")}
+        onBack={onBack}
         hasCustomer={hasCustomer}
         setHasCustomer={setHasCustomer}
         setMode={setMode}
@@ -82,7 +88,7 @@ export default function Home({ mode, setMode, hasCustomer, setHasCustomer }) {
   if (page === "addBlouse")
     return (
       <AddBlouse
-        onBack={() => setPage("home")}
+        onBack={onBack}
         hasCustomer={hasCustomer}
         setHasCustomer={setHasCustomer}
         setMode={setMode}
@@ -92,7 +98,7 @@ export default function Home({ mode, setMode, hasCustomer, setHasCustomer }) {
   if (page === "addPersonal")
     return (
       <AddPersonal
-        onBack={() => setPage("home")}
+        onBack={onBack}
         hasCustomer={hasCustomer}
         setHasCustomer={setHasCustomer}
         setMode={setMode}
