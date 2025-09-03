@@ -1,11 +1,18 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { FiArrowLeft } from "react-icons/fi";
 import CustomSelect from "./CustomSelect";
 import { toast } from "react-toastify";
 import { doc, updateDoc } from "firebase/firestore";
 import { db } from "../firebaseConfig";
+import { useOptions } from "../context/options";
 
-export default function AddTop({ onBack }) {
+export default function AddTop({
+  onBack,
+  hasCustomer,
+  setHasCustomer,
+  setMode,
+  mode,
+}) {
   const fields = [
     "Point",
     "Waist",
@@ -21,10 +28,21 @@ export default function AddTop({ onBack }) {
 
   const [formData, setFormData] = useState({});
   const [selectedUser, setSelectedUser] = useState(null);
+  const { options } = useOptions();
 
   const handleChange = (e, field) => {
     setFormData({ ...formData, [field]: e.target.value });
   };
+
+  useEffect(() => {
+    if (hasCustomer && mode?.type === "edit") {
+      setFormData(hasCustomer?.data);
+      const findCustomer = options?.find(
+        (item) => item?.value === hasCustomer.id
+      );
+      setSelectedUser(findCustomer);
+    }
+  }, [hasCustomer]);
 
   const handleSubmit = async () => {
     const isValid = fields.every((field) => {
@@ -42,16 +60,28 @@ export default function AddTop({ onBack }) {
         return;
       }
 
-      const userRef = doc(db, "customers", selectedUser.value);
+      if (mode?.type === "edit" && hasCustomer?.id) {
+        await updateDoc(doc(db, "customers", hasCustomer.id), {
+          topInfo: { ...formData },
+          updatedAt: new Date(),
+        });
+        toast.success("Top data updated successfully!");
+        setHasCustomer(null);
+        setMode(null);
+        setFormData({});
+        onBack();
+      } else {
+        const userRef = doc(db, "customers", selectedUser.value);
 
-      await updateDoc(userRef, {
-        topInfo: { ...formData },
-        updatedAt: new Date(),
-      });
+        await updateDoc(userRef, {
+          topInfo: { ...formData },
+          updatedAt: new Date(),
+        });
 
-      toast.success("Top data updated successfully!");
-      setFormData({});
-      onBack();
+        toast.success("Top data updated successfully!");
+        setFormData({});
+        onBack();
+      }
     } catch (error) {
       console.error("Error updating document: ", error);
       alert("Failed to update user");
@@ -77,7 +107,8 @@ export default function AddTop({ onBack }) {
           <CustomSelect
             label={"Select Customer"}
             required={true}
-            setValue={setSelectedUser}
+            onChange={(e) => setSelectedUser(e)}
+            value={selectedUser}
           />
         </div>
 

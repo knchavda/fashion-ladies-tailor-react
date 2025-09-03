@@ -6,6 +6,7 @@ import { db } from "../firebaseConfig";
 import { deleteDoc, doc } from "firebase/firestore";
 import { toast } from "react-toastify";
 import { useOptions } from "../context/options";
+import EditModal from "./EditModal";
 
 const PAGE_SIZE = 5;
 
@@ -14,9 +15,13 @@ export default function CustomerTable({
   handleView,
   allCustomers,
   fetchAllCustomers,
+  setMode,
+  setHasCustomer,
+  setTab
 }) {
   const [page, setPage] = useState(1);
   const [confirmModal, setConfirmModal] = useState(false);
+  const [confirmEditModal, setConfirmEditModal] = useState(false);
   const [selectedCustomer, setSelectedCustomer] = useState(null);
   const { setOptions } = useOptions();
 
@@ -51,7 +56,7 @@ export default function CustomerTable({
     setSelectedCustomer(payload);
   };
 
-  const handleConfirm = async () => {
+  const handleDeleteConfirm = async () => {
     try {
       await deleteDoc(doc(db, "customers", selectedCustomer));
       setConfirmModal(false);
@@ -65,7 +70,7 @@ export default function CustomerTable({
     }
   };
 
-  const handleCancel = () => {
+  const handleDeleteCancel = () => {
     setConfirmModal(false);
   };
 
@@ -77,6 +82,7 @@ export default function CustomerTable({
   useEffect(() => {
     setPage(1);
   }, [filter, allCustomers]);
+
 
   return (
     <div className="card overflow-hidden">
@@ -108,7 +114,10 @@ export default function CustomerTable({
                     </button>
                     <button
                       className="p-1.5 bg-sky-100 hover:bg-sky-200 rounded"
-                      onClick={() => handleEdit(r.id)}
+                      onClick={() => {
+                        setConfirmEditModal(true);
+                        setSelectedCustomer(r);
+                      }}
                     >
                       <MdEdit size={20} />
                     </button>
@@ -158,8 +167,20 @@ export default function CustomerTable({
 
       <ConfirmationModal
         open={confirmModal}
-        handleCancel={handleCancel}
-        handleConfirm={handleConfirm}
+        handleCancel={handleDeleteCancel}
+        handleConfirm={handleDeleteConfirm}
+      />
+
+      <EditModal
+        open={confirmEditModal}
+        handleCancel={() => {
+          setConfirmEditModal(false);
+          setSelectedCustomer(null);
+        }}
+        selectedCustomer={selectedCustomer}
+        setHasCustomer={setHasCustomer}
+        setMode={setMode}
+        setTab={setTab}
       />
     </div>
   );

@@ -1,5 +1,6 @@
 import Select from "react-select";
 import { useOptions } from "../context/options";
+import { useEffect } from "react";
 
 export default function CustomSelect({
   value,
@@ -7,9 +8,9 @@ export default function CustomSelect({
   placeholder,
   label,
   required,
+  onChange
 }) {
   const { options } = useOptions();
-
 
   return (
     <div className="flex flex-col">
@@ -19,7 +20,7 @@ export default function CustomSelect({
       <Select
         options={options}
         value={value}
-        onChange={setValue}
+        onChange={onChange}
         placeholder={placeholder}
         isClearable
         styles={{

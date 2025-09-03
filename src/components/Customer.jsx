@@ -4,7 +4,7 @@ import CustomerDetailsScreen from "./CustomerDetailsScreen.jsx";
 import { getDocs, collection } from "firebase/firestore";
 import { db } from "../firebaseConfig.jsx";
 
-export default function Customer() {
+export default function Customer({ setMode, hasCustomer, setHasCustomer, setTab }) {
   const [filter, setFilter] = useState("");
   const [allCustomers, setAllCustomers] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -59,6 +59,10 @@ export default function Customer() {
               handleView={handleView}
               allCustomers={allCustomers}
               fetchAllCustomers={fetchAllCustomers}
+              setMode={setMode} 
+              setHasCustomer={setHasCustomer}
+              hasCustomer={hasCustomer}
+              setTab={setTab}
             />
           </>
         ) : (

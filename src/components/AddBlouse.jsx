@@ -1,11 +1,18 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { FiArrowLeft } from "react-icons/fi";
 import { db } from "../firebaseConfig";
 import { doc, updateDoc } from "firebase/firestore";
 import { toast } from "react-toastify";
 import CustomSelect from "./CustomSelect";
+import { useOptions } from "../context/options";
 
-export default function AddBlouse({ onBack }) {
+export default function AddBlouse({
+  onBack,
+  hasCustomer,
+  setHasCustomer,
+  setMode,
+  mode,
+}) {
   const fields = [
     "Length",
     "Upper chest",
@@ -24,9 +31,21 @@ export default function AddBlouse({ onBack }) {
   const [formData, setFormData] = useState({});
   const [selectedUser, setSelectedUser] = useState(null);
 
+  const { options } = useOptions();
+
   const handleChange = (e, field) => {
     setFormData({ ...formData, [field]: e.target.value });
   };
+
+  useEffect(() => {
+    if (hasCustomer && mode?.type === "edit") {
+      setFormData(hasCustomer?.data);
+      const findCustomer = options?.find(
+        (item) => item?.value === hasCustomer.id
+      );
+      setSelectedUser(findCustomer);
+    }
+  }, [hasCustomer]);
 
   const handleSubmit = async () => {
     const isValid = fields.every((field) => {
@@ -43,16 +62,28 @@ export default function AddBlouse({ onBack }) {
         return;
       }
 
-      const userRef = doc(db, "customers", selectedUser.value);
+      if (mode?.type === "edit" && hasCustomer?.id) {
+        await updateDoc(doc(db, "customers", hasCustomer.id), {
+          blouseInfo: { ...formData },
+          updatedAt: new Date(),
+        });
+        toast.success("Blouse data updated successfully!");
+        setHasCustomer(null);
+        setMode(null);
+        setFormData({});
+        onBack();
+      } else {
+        const userRef = doc(db, "customers", selectedUser.value);
 
-      await updateDoc(userRef, {
-        blouseInfo: { ...formData },
-        updatedAt: new Date(),
-      });
+        await updateDoc(userRef, {
+          blouseInfo: { ...formData },
+          updatedAt: new Date(),
+        });
 
-      toast.success("Blouse data updated successfully!");
-      setFormData({});
-      onBack();
+        toast.success("Blouse data updated successfully!");
+        setFormData({});
+        onBack();
+      }
     } catch (error) {
       console.error("Error updating document: ", error);
       alert("Failed to update user");
@@ -78,7 +109,8 @@ export default function AddBlouse({ onBack }) {
           <CustomSelect
             label={"Select Customer"}
             required={true}
-            setValue={setSelectedUser}
+            onChange={(e) => setSelectedUser(e)}
+            value={selectedUser}
           />
         </div>
 

@@ -4,12 +4,14 @@ import Customer from "./Customer.jsx";
 
 export default function BottomNav() {
   const [tab, setTab] = useState("home");
+  const [mode, setMode] = useState("");
+  const [hasCustomer, setHasCustomer] = useState(null)
 
   return (
     <div className="min-h-screen flex flex-col">
       <div className="flex-grow overflow-auto pb-24">
-        {tab === "home" && <Home />}
-        {tab === "customer" && <Customer />}
+        {tab === "home" && <Home mode={mode} setMode={setMode} hasCustomer={hasCustomer} setHasCustomer={setHasCustomer}/>}
+        {tab === "customer" && <Customer  mode={mode} setMode={setMode} hasCustomer={hasCustomer} setHasCustomer={setHasCustomer} setTab={setTab}/>}
       </div>
 
       {/* Bottom Sheet Style Nav */}

@@ -1,12 +1,18 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { FiArrowLeft } from "react-icons/fi";
 import { toast } from "react-toastify";
 import { db } from "../firebaseConfig";
-import { collection, addDoc } from "firebase/firestore";
+import { collection, addDoc, doc, updateDoc } from "firebase/firestore";
 import { fetchUsers } from "../utils/helper";
 import { useOptions } from "../context/options";
 
-export default function AddPersonal({ onBack }) {
+export default function AddPersonal({
+  onBack,
+  hasCustomer,
+  setHasCustomer,
+  setMode,
+  mode,
+}) {
   const fields = ["First Name", "Last Name", "Contact Number"];
   const { setOptions } = useOptions();
 
@@ -16,29 +22,49 @@ export default function AddPersonal({ onBack }) {
     setFormData({ ...formData, [field]: e.target.value });
   };
 
+  useEffect(() => {
+    if (hasCustomer && mode?.type === "edit") {
+      setFormData(hasCustomer?.data);
+    }
+  }, [hasCustomer]);
+
   const handleSubmit = async () => {
     const isValid = fields.every((field) => {
       return formData?.[field] && formData[field].trim() !== "";
     });
 
-    if(!isValid) {
+    if (!isValid) {
       toast.warning("All fields required!");
-      return
+      return;
     }
 
     try {
-      await addDoc(collection(db, "customers"), {
-        personalInfo: { ...formData },
-        createdAt: new Date(),
-      });
-      toast.success("Personal data saved successfully!");
+      if (mode?.type === "edit" && hasCustomer?.id) {
+        await updateDoc(doc(db, "customers", hasCustomer.id), {
+          personalInfo: { ...formData },
+          updatedAt: new Date(),
+        });
+        toast.success("Personal data updated successfully!");
+        setHasCustomer(null);
+        setMode(null);
+        setFormData({});
+        onBack();
+      } else {
+        await addDoc(collection(db, "customers"), {
+          personalInfo: { ...formData },
+          createdAt: new Date(),
+        });
+        toast.success("Personal data saved successfully!");
+      }
       const allCustomers = await fetchUsers();
       setOptions(allCustomers);
       setFormData({});
       onBack();
     } catch (error) {
-      console.error("Error adding document: ", error);
-      alert("Failed to add user");
+      console.error("Error saving document: ", error);
+      toast.error(
+        mode === "edit" ? "Failed to update user" : "Failed to add user"
+      );
     }
   };
 
