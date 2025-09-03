@@ -1,12 +1,14 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { FiArrowLeft } from "react-icons/fi";
+import { toast } from "react-toastify";
+import { db } from "../firebaseConfig";
+import { collection, addDoc } from "firebase/firestore";
+import { fetchUsers } from "../utils/helper";
+import { useOptions } from "../context/options";
 
 export default function AddPersonal({ onBack }) {
-  const fields = [
-    "First Name",
-    "Last Name",
-    "Contact Number",
-  ];
+  const fields = ["First Name", "Last Name", "Contact Number"];
+  const { setOptions } = useOptions();
 
   const [formData, setFormData] = useState({});
 
@@ -14,9 +16,30 @@ export default function AddPersonal({ onBack }) {
     setFormData({ ...formData, [field]: e.target.value });
   };
 
-  const handleSubmit = () => {
-    console.log("Form Submitted:", formData);
-    alert("Data saved successfully!");
+  const handleSubmit = async () => {
+    const isValid = fields.every((field) => {
+      return formData?.[field] && formData[field].trim() !== "";
+    });
+
+    if(!isValid) {
+      toast.warning("All fields required!");
+      return
+    }
+
+    try {
+      await addDoc(collection(db, "customers"), {
+        personalInfo: { ...formData },
+        createdAt: new Date(),
+      });
+      toast.success("Personal data saved successfully!");
+      const allCustomers = await fetchUsers();
+      setOptions(allCustomers);
+      setFormData({});
+      onBack();
+    } catch (error) {
+      console.error("Error adding document: ", error);
+      alert("Failed to add user");
+    }
   };
 
   return (
@@ -38,10 +61,10 @@ export default function AddPersonal({ onBack }) {
           {fields.map((field, i) => (
             <div key={i} className="flex flex-col">
               <label className="text-sm font-medium text-gray-600 mb-1">
-                {field}
-              </label>
+                {field} {true && <span className="text-red-500">*</span>}
+              </label>{" "}
               <input
-                type="number"
+                type="text"
                 placeholder={`Enter ${field}`}
                 className="input"
                 value={formData[field] || ""}

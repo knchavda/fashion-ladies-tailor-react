@@ -1,26 +1,33 @@
-import React, { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { MdEdit, MdRemoveRedEye, MdDelete } from "react-icons/md";
-
-const initialRows = [
-  { id: 1, name: "Aarti Shah", contact: "9876543210" },
-  { id: 2, name: "Kiran Patel", contact: "9876500011" },
-  { id: 3, name: "Rina Mehta", contact: "9825012345" },
-  { id: 4, name: "Pooja Singh", contact: "9909909901" },
-  { id: 5, name: "Juhi Rana", contact: "9988776655" },
-  { id: 6, name: "Mansi Joshi", contact: "9012345678" },
-  { id: 7, name: "Hetal Dave", contact: "9090909090" },
-];
+import { capitalizeFirstLetter, fetchUsers } from "../utils/helper";
+import ConfirmationModal from "./ConfirmModal";
+import { db } from "../firebaseConfig";
+import { deleteDoc, doc } from "firebase/firestore";
+import { toast } from "react-toastify";
+import { useOptions } from "../context/options";
 
 const PAGE_SIZE = 5;
 
-export default function CustomerTable({ filter, handleView }) {
-  const [rows, setRows] = useState(initialRows);
+export default function CustomerTable({
+  filter,
+  handleView,
+  allCustomers,
+  fetchAllCustomers,
+}) {
   const [page, setPage] = useState(1);
+  const [confirmModal, setConfirmModal] = useState(false);
+  const [selectedCustomer, setSelectedCustomer] = useState(null);
+  const { setOptions } = useOptions();
+
+  const rows = allCustomers || [];
 
   const filtered = useMemo(() => {
     const f = (filter || "").trim();
     if (!f) return rows;
-    return rows.filter((r) => r.contact.includes(f));
+    return rows.filter((r) =>
+      r?.personalInfo["Contact Number"]?.toString().includes(f)
+    );
   }, [rows, filter]);
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
@@ -30,20 +37,36 @@ export default function CustomerTable({ filter, handleView }) {
   const handleEdit = (id) => {
     const row = rows.find((r) => r.id === id);
     if (!row) return;
+
     const name = prompt("Edit name:", row.name);
     if (name === null) return;
     const contact = prompt("Edit contact:", row.contact);
     if (contact === null) return;
-    const address = prompt("Edit address:", row.address);
+    const address = prompt("Edit address:", row.address || "");
     if (address === null) return;
-    setRows((prev) =>
-      prev.map((r) => (r.id === id ? { ...r, name, contact, address } : r))
-    );
   };
 
-  const handleDelete = (id) => {
-    if (!confirm("Delete this customer?")) return;
-    setRows((prev) => prev.filter((r) => r.id !== id));
+  const handleDelete = (payload) => {
+    setConfirmModal(true);
+    setSelectedCustomer(payload);
+  };
+
+  const handleConfirm = async () => {
+    try {
+      await deleteDoc(doc(db, "customers", selectedCustomer));
+      setConfirmModal(false);
+      toast.success("Customer deleted successfully");
+      fetchAllCustomers();
+      const allCustomers = await fetchUsers();
+      setOptions(allCustomers);
+      setSelectedCustomer(null);
+    } catch (error) {
+      console.error("Error deleting document", error);
+    }
+  };
+
+  const handleCancel = () => {
+    setConfirmModal(false);
   };
 
   const goto = (p) => {
@@ -51,10 +74,9 @@ export default function CustomerTable({ filter, handleView }) {
     setPage(np);
   };
 
-  // reset page when filter changes
-  React.useEffect(() => {
+  useEffect(() => {
     setPage(1);
-  }, [filter]);
+  }, [filter, allCustomers]);
 
   return (
     <div className="card overflow-hidden">
@@ -70,10 +92,14 @@ export default function CustomerTable({ filter, handleView }) {
           <tbody>
             {view.map((r) => (
               <tr key={r.id} className="border-t">
-                <td className="px-4 py-3">{r.name}</td>
-                <td className="px-4 py-3">{r.contact}</td>
-                <td className="px-4 py-3 text-right space-x-2">
-                  <div className="flex items-center gap-1">
+                <td className="px-4 py-3">{`${capitalizeFirstLetter(
+                  r?.personalInfo["First Name"]
+                )} ${capitalizeFirstLetter(r?.personalInfo["Last Name"])}`}</td>
+                <td className="px-4 py-3">
+                  {r?.personalInfo["Contact Number"]}
+                </td>
+                <td className="px-4 py-3 text-right">
+                  <div className="flex items-center gap-1 justify-end">
                     <button
                       className="p-1.5 bg-green-100 hover:bg-green-200 rounded"
                       onClick={() => handleView(r)}
@@ -98,7 +124,7 @@ export default function CustomerTable({ filter, handleView }) {
             ))}
             {view.length === 0 && (
               <tr>
-                <td className="px-4 py-6 text-center text-sky-700" colSpan="4">
+                <td className="px-4 py-6 text-center text-sky-700" colSpan="3">
                   No customers found.
                 </td>
               </tr>
@@ -113,13 +139,6 @@ export default function CustomerTable({ filter, handleView }) {
           Page {page} of {totalPages}
         </span>
         <div className="space-x-2">
-          {/* <button
-            className="btn px-3 py-1 bg-sky-100"
-            onClick={() => goto(1)}
-            disabled={page === 1}
-          >
-            First
-          </button> */}
           <button
             className="btn px-3 py-1 bg-sky-100"
             onClick={() => goto(page - 1)}
@@ -134,15 +153,14 @@ export default function CustomerTable({ filter, handleView }) {
           >
             Next
           </button>
-          {/* <button
-            className="btn px-3 py-1 bg-sky-100"
-            onClick={() => goto(totalPages)}
-            disabled={page === totalPages}
-          >
-            Last
-          </button> */}
         </div>
       </div>
+
+      <ConfirmationModal
+        open={confirmModal}
+        handleCancel={handleCancel}
+        handleConfirm={handleConfirm}
+      />
     </div>
   );
 }

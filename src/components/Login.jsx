@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import LOGO from  "../assets/logo.svg"
+import { useState } from "react";
+import LOGO from "../assets/logo.svg";
 
 export default function Login({ onLogin }) {
   const [username, setUsername] = useState("");
@@ -12,11 +12,7 @@ export default function Login({ onLogin }) {
       <div className="card w-full max-w-sm p-8">
         {/* Logo */}
         <div className="flex justify-center mb-6">
-          <img
-            src={LOGO}  
-            alt="App Logo"
-            className="h-16 w-16 object-contain"
-          />
+          <img src={LOGO} alt="App Logo" className="h-16 w-16 object-contain" />
         </div>
 
         {/* Title */}
@@ -41,7 +37,7 @@ export default function Login({ onLogin }) {
             onChange={(e) => setPassword(e.target.value)}
           />
           <button
-            onClick={onLogin}
+            onClick={() => onLogin(username, password)}
             disabled={disabled}
             className={`btn btn-primary w-full ${
               disabled ? "opacity-60 cursor-not-allowed" : ""

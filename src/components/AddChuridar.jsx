@@ -1,18 +1,49 @@
 import React, { useState } from "react";
 import { FiArrowLeft } from "react-icons/fi";
+import CustomSelect from "./CustomSelect";
+import { toast } from "react-toastify";
+import { doc, updateDoc } from "firebase/firestore";
+import { db } from "../firebaseConfig";
 
 export default function AddChuridar({ onBack }) {
   const fields = ["Length", "Knee length", "Knee round", "Calf", "Bottom"];
 
   const [formData, setFormData] = useState({});
+  const [selectedUser, setSelectedUser] = useState(null);
 
   const handleChange = (e, field) => {
     setFormData({ ...formData, [field]: e.target.value });
   };
 
-  const handleSubmit = () => {
-    console.log("Form Submitted:", formData);
-    alert("Data saved successfully!");
+  const handleSubmit = async () => {
+    const isValid = fields.every((field) => {
+      return formData?.[field] && formData[field].trim() !== "";
+    });
+
+    if (!isValid) {
+      toast.warning("All fields required!");
+      return;
+    }
+    try {
+      if (!selectedUser?.value) {
+        toast.error("Please select a user first!");
+        return;
+      }
+
+      const userRef = doc(db, "customers", selectedUser.value);
+
+      await updateDoc(userRef, {
+        churidarInfo: { ...formData },
+        updatedAt: new Date(),
+      });
+
+      toast.success("Chruidar data updated successfully!");
+      setFormData({});
+      onBack();
+    } catch (error) {
+      console.error("Error updating document: ", error);
+      alert("Failed to update user");
+    }
   };
 
   return (
@@ -30,12 +61,19 @@ export default function AddChuridar({ onBack }) {
 
       {/* Card Section */}
       <div className="card w-full max-w-md p-4 shadow-lg bg-white rounded-xl">
+        <div className="mb-2">
+          <CustomSelect
+            label={"Select Customer"}
+            required={true}
+            setValue={setSelectedUser}
+          />
+        </div>
         <div className="space-y-4">
           {fields.map((field, i) => (
             <div key={i} className="flex flex-col">
               <label className="text-sm font-medium text-gray-600 mb-1">
-                {field}
-              </label>
+                {field} {true && <span className="text-red-500">*</span>}
+              </label>{" "}
               <input
                 type="number"
                 placeholder={`Enter ${field}`}
