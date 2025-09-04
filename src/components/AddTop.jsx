@@ -18,9 +18,11 @@ export default function AddTop({
     "Waist",
     "Length",
     "Chest",
+    "Waist_R",
     "Seat",
     "Shoulder",
-    "Neck",
+    "F_Neck",
+    "B_Neck",
     "Sleeves",
     "Bottom",
     "Mundo",
@@ -42,8 +44,8 @@ export default function AddTop({
       );
       setSelectedUser(findCustomer);
     } else {
-      setMode(null)
-      setHasCustomer(null)
+      setMode(null);
+      setHasCustomer(null);
     }
   }, [hasCustomer]);
 
